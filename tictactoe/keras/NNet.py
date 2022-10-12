@@ -27,7 +27,7 @@ args = dotdict({
     'dropout': 0.3,
     'epochs': 10,
     'batch_size': 64,
-    'cuda': False,
+    'cuda': True,
     'num_channels': 512,
 })
 
@@ -65,7 +65,7 @@ class NNetWrapper(NeuralNet):
 
     def save_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
         # change extension
-        filename = filename.split(".")[0] + ".h5"
+        # filename = filename.split(".")[0] + ".h5"
 
         filepath = os.path.join(folder, filename)
         if not os.path.exists(folder):
@@ -77,7 +77,7 @@ class NNetWrapper(NeuralNet):
 
     def load_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
         # change extension
-        filename = filename.split(".")[0] + ".h5"
+        # filename = filename.split(".")[0] + ".h5"
 
         # https://github.com/pytorch/examples/blob/master/imagenet/main.py#L98
         filepath = os.path.join(folder, filename)

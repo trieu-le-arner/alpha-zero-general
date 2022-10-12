@@ -2,6 +2,11 @@ import logging
 
 from tqdm import tqdm
 
+logging.basicConfig(filename='./temp/log.txt',
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
 
@@ -73,6 +78,8 @@ class Arena():
             draws:  games won by nobody
         """
 
+        log.info(f'Arena starts!')
+
         num = int(num / 2)
         oneWon = 0
         twoWon = 0
@@ -80,10 +87,13 @@ class Arena():
         for _ in tqdm(range(num), desc="Arena.playGames (1)"):
             gameResult = self.playGame(verbose=verbose)
             if gameResult == 1:
+                log.info(f'Player1 wins!')
                 oneWon += 1
             elif gameResult == -1:
+                log.info(f'Player2 wins!')
                 twoWon += 1
             else:
+                log.info(f'Tie!')
                 draws += 1
 
         self.player1, self.player2 = self.player2, self.player1
@@ -91,10 +101,15 @@ class Arena():
         for _ in tqdm(range(num), desc="Arena.playGames (2)"):
             gameResult = self.playGame(verbose=verbose)
             if gameResult == -1:
+                log.info(f'Player1 wins!')
                 oneWon += 1
             elif gameResult == 1:
+                log.info(f'Player2 wins!')
                 twoWon += 1
             else:
+                log.info(f'Tie!')
                 draws += 1
+
+        log.info(f'Arena ends!')
 
         return oneWon, twoWon, draws

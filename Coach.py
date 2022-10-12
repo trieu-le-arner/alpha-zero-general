@@ -11,6 +11,12 @@ from tqdm import tqdm
 from Arena import Arena
 from MCTS import MCTS
 
+logging.basicConfig(filename='./temp/log.txt',
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG)
+
 log = logging.getLogger(__name__)
 
 
