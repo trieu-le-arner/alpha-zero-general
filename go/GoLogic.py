@@ -1,4 +1,8 @@
+import sys
+sys.path.append('..')
+
 import gym
+import numpy as np
 
 '''
 Board class for the game of Go.
@@ -12,11 +16,17 @@ Based on the board for the game of Othello by Eric P. Nichols.
 '''
 
 class Board:
-  def __init__(self, n=9):
+  def __init__(self, state=None, n=9):
     self.n = n
     
-    env = gym.make('gym_go:go-v0', size=n, komi=0, reward_method='real')
-    env.reset()
+    self.env = gym.make('gym_go:go-v0', size=n, komi=0, reward_method='real')
+    self.env.reset(state=state)
+
+  def state(self):
+    return self.env.state()
+
+  def canonical_state(self):
+    return self.env.canonical_state()
 
   def get_legal_moves(self, color):
     """
@@ -62,5 +72,21 @@ class Board:
     """
     self.env.step(move)
 
-
+  def to2darray(self):
+    state = self.env.state()
     
+    s = [None] * self.n
+    for row in range(self.n):
+      s[row] = [None] * self.n
+      for col in range(self.n):
+        if state[0][row][col] == 1:
+          s[row][col] = 1
+        elif state[1][row][col] == 1:
+          s[row][col] = -1
+        else:
+          s[row][col] = 0
+    
+    return np.array(s)
+
+  def tostring(self):
+    return self.to2darray().tostring()

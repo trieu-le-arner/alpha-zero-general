@@ -60,7 +60,7 @@ class NNetWrapper(NeuralNet):
         # run
         pi, v = self.nnet.model.predict(board, verbose=False)
 
-        #print('PREDICTION TIME TAKEN : {0:03f}'.format(time.time()-start))
+        # print('PREDICTION TIME TAKEN : {0:03f}'.format(time.time()-start))
         return pi[0], v[0]
 
     def save_checkpoint(self, folder='checkpoint', filename='checkpoint.pth.tar'):
