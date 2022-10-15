@@ -1,7 +1,7 @@
 import sys
 sys.path.append('..')
 from Game import Game
-from GoLogic import Board
+from .GoLogic import Board
 import numpy as np
 
 """

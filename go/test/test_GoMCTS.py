@@ -37,7 +37,19 @@ class TestGoGame(unittest.TestCase):
     nnet = DummyNNet(game=g)
     mcts = MCTS(g, nnet, args)
     v = mcts.search(g.getCanonicalForm(b, p))
-    print(v, '***')
+    
+    self.assertEqual(v, -1)
+
+  def test_getActionProb(self):
+    g = Game(n=2)
+    b = g.getInitBoard()
+    p = 1
+
+    nnet = DummyNNet(game=g)
+    mcts = MCTS(g, nnet, args)
+    probs = mcts.getActionProb(g.getCanonicalForm(b, p), temp=1)
+    
+    self.assertEqual(len(probs), g.getActionSize())
 
 if __name__ == '__main__':
   unittest.main()
