@@ -1,3 +1,6 @@
+import sys
+sys.setrecursionlimit(10000)
+
 import logging
 import math
 
@@ -23,20 +26,24 @@ class MCTS():
         self.Ps = {}  # stores initial policy (returned by neural net)
 
         self.Es = {}  # stores game.getGameEnded ended for board s
-        self.Vs = {}  # stores game.getValidMoves for board s
+        # self.Vs = {}  # stores game.getValidMoves for board s
 
     def getActionProb(self, canonicalBoard, temp=1):
         """
         This function performs numMCTSSims simulations of MCTS starting from
-        canonicalBoard.
+        canonicalBoard, which is NOT a terminal node because the game loop has been stopped.
 
         Returns:
             probs: a policy vector where the probability of the ith action is
                    proportional to Nsa[(s,a)]**(1./temp)
         """
-        for i in range(self.args.numMCTSSims):
-            self.search(canonicalBoard)
 
+        # print('{{{ Start a turn')
+        for i in range(self.args.numMCTSSims):
+            # print('>>> Start a simulation')
+            self.search(canonicalBoard)
+            # print('<<< End the simulation')
+        # print('}}} End the turn')
         s = self.game.stringRepresentation(canonicalBoard)
         counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
 
@@ -49,10 +56,17 @@ class MCTS():
 
         counts = [x ** (1. / temp) for x in counts]
         counts_sum = float(sum(counts))
-        probs = [x / counts_sum for x in counts]
-        return probs
+        if counts_sum > 0:
+            probs = [x / counts_sum for x in counts]
+            return probs
+        elif counts_sum == 0:
+            print('Why does the model pick an action while the game has been ended?')
+            print(self.game.getGameEnded(canonicalBoard, 1))
+            probs = [0.0] * self.game.getActionSize()
+            probs[-1] = 1.0
+            return probs
 
-    def search(self, canonicalBoard):
+    def search(self, canonicalBoard, depth=0):
         """
         This function performs one iteration of MCTS. It is recursively called
         till a leaf node is found. The action chosen at each node is one that
@@ -71,6 +85,9 @@ class MCTS():
         Returns:
             v: the negative of the value of the current canonicalBoard
         """
+
+        if depth > self.args.numMCTSDepth:
+            return 0
 
         s = self.game.stringRepresentation(canonicalBoard)
 
@@ -97,11 +114,12 @@ class MCTS():
                 self.Ps[s] = self.Ps[s] + valids
                 self.Ps[s] /= np.sum(self.Ps[s])
 
-            self.Vs[s] = valids
+            # self.Vs[s] = valids
             self.Ns[s] = 0
             return -v
 
-        valids = self.Vs[s]
+        # valids = self.Vs[s]
+        valids = self.game.getValidMoves(canonicalBoard, 1)
         cur_best = -float('inf')
         best_act = -1
 
@@ -119,10 +137,20 @@ class MCTS():
                     best_act = a
 
         a = best_act
+        # print('**************')
+        # print(canonicalBoard.env.state()[0])
+        # print(canonicalBoard.env.state()[1])
+        # print(canonicalBoard.env.state()[3])
+        # tmp = 1 - np.reshape(valids[:-1], (canonicalBoard.n, canonicalBoard.n))
+        # print(tmp)
+        # if (tmp == canonicalBoard.env.state()[3]).all() == False:
+        #     raise 'Mismatch valid!!!'
+        # print(a)
+        # print('**************')
         next_s, next_player = self.game.getNextState(canonicalBoard, 1, a)
         next_s = self.game.getCanonicalForm(next_s, next_player)
 
-        v = self.search(next_s)
+        v = self.search(next_s, depth=depth + 1)
 
         if (s, a) in self.Qsa:
             self.Qsa[(s, a)] = (self.Nsa[(s, a)] * self.Qsa[(s, a)] + v) / (self.Nsa[(s, a)] + 1)

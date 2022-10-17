@@ -1,6 +1,6 @@
 import unittest
 
-from GoGame import GoGame as Game
+from ..GoGame import GoGame as Game
 from MCTS import MCTS
 from NeuralNet import NeuralNet
 from utils import *
@@ -18,6 +18,7 @@ args = dotdict({
   'load_model': True,
   'load_folder_file': ('./temp', 'best.pth.tar'),
   'numItersForTrainExamplesHistory': 20,
+  'numMCTSDepth': 100,
 })
 
 class DummyNNet(NeuralNet):
@@ -50,6 +51,25 @@ class TestGoGame(unittest.TestCase):
     probs = mcts.getActionProb(g.getCanonicalForm(b, p), temp=1)
     
     self.assertEqual(len(probs), g.getActionSize())
+
+  # def test_getActionProbFullBoard(self):
+  #   g = Game(n=2)
+  #   b = g.getInitBoard()
+  #   p = 1
+
+  #   b, p = g.getNextState(b, p, 0)
+  #   b, p = g.getNextState(b, p, 1)
+  #   b, p = g.getNextState(b, p, 3)
+  #   b, p = g.getNextState(b, p, 4)
+
+  #   print(g.getGameEnded(b, 1))
+  #   print(g.getGameEnded(b, -1))
+
+  #   nnet = DummyNNet(game=g)
+  #   mcts = MCTS(g, nnet, args)
+  #   probs = mcts.getActionProb(g.getCanonicalForm(b, p), temp=1)
+    
+  #   self.assertEqual(probs, [0.0, 0.0, 0.0, 0.0, 1.0])
 
 if __name__ == '__main__':
   unittest.main()

@@ -64,9 +64,22 @@ class Coach():
             pi = self.mcts.getActionProb(canonicalBoard, temp=temp)
             sym = self.game.getSymmetries(canonicalBoard, pi)
             for b, p in sym:
-                trainExamples.append([b, self.curPlayer, p, None])
+                trainExamples.append([b.to2darray(), self.curPlayer, p, None])
+
+            valids = self.game.getValidMoves(canonicalBoard, 1)
+    
+
+            pi = pi * valids  # masking invalid moves
+            sum_pi = np.sum(pi)
+            if sum_pi > 0:
+                pi = pi / sum_pi  # renormalize
+            else:
+                pi = pi + valids
+                pi = pi / np.sum(pi)
+                
 
             action = np.random.choice(len(pi), p=pi)
+            
             board, self.curPlayer = self.game.getNextState(board, self.curPlayer, action)
 
             r = self.game.getGameEnded(board, self.curPlayer)
@@ -120,8 +133,8 @@ class Coach():
             nmcts = MCTS(self.game, self.nnet, self.args)
 
             log.info('PITTING AGAINST PREVIOUS VERSION')
-            arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
-                          lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game)
+            arena = Arena(lambda x: get_move_in_arena(x, pmcts, self.game),
+                          lambda x: get_move_in_arena(x, nmcts, self.game), self.game)
             pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
 
             log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
@@ -161,3 +174,33 @@ class Coach():
 
             # examples based on the model were already collected (loaded)
             self.skipFirstSelfPlay = True
+
+def get_move_in_arena(canonicalBoard, mcts, game):
+    # The game has ended.
+    # if game.getGameEnded(canonicalBoard, 1) != 0:
+    #     return game.n * game.n
+    
+    pi = mcts.getActionProb(canonicalBoard, temp=0)
+    a = np.argmax(pi)
+    valids = game.getValidMoves(canonicalBoard, 1)
+    if valids[a] == 0:
+        print(canonicalBoard.state())
+        print(game.getGameEnded(canonicalBoard, 1))
+
+        pi = pi * valids  # masking invalid moves
+        sum_pi = np.sum(pi)
+        if sum_pi > 0:
+            pi = pi / sum_pi  # renormalize
+            return np.random.choice(len(pi), p=pi)
+        else:
+            pi = pi + valids
+            pi = pi / np.sum(pi)
+            return np.random.choice(len(pi), p=pi)
+        # pi = pi * valids
+        # if np.sum(pi) == 0:
+        #     return game.n * game.n
+        # else:
+        #     pi = pi / np.sum(pi)
+        #     return np.random.choice(len(pi), p=pi)
+    else:
+        return a

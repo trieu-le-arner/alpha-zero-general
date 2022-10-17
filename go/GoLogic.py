@@ -61,6 +61,11 @@ class Board:
     if self.env.game_ended():
       return self.env.winner() == color
     else:
+      if self.env.prev_player_passed():
+        if self.env.turn() == 0 and color == 1 and self.env.winning() == 1:
+          return True
+        elif self.env.turn() == 1 and color == -1 and self.env.winning() == -1:
+          return True
       return False
 
 

@@ -29,18 +29,23 @@ class GoGame(Game):
     return self.n * self.n + 1
 
   def getNextState(self, board, player, action):
+    assert player != 0
+    
     # If player takes action on board, return next (board, player).
     # The selected action must be a valid move.
-    if action == self.n * self.n: # The pass action
-      board.execute_move(None, player)
-      return (board, -player)
-    
     next_board = Board(state=board.state(), n=self.n)
+
+    if action == self.n * self.n: # The pass action
+      next_board.execute_move(None, player)
+      return (next_board, -player)
+    
     move = (int(action / self.n), action % self.n)
     next_board.execute_move(move, player)
     return (next_board, -player)
 
   def getValidMoves(self, board, player):
+    assert player != 0
+    
     valids = [0] * self.getActionSize()
     legalMoves = board.get_legal_moves(player)
     if len(legalMoves) == 0:
@@ -58,19 +63,24 @@ class GoGame(Game):
       0 if the game has not ended
       a small positive value if the game tied
     """
+    assert player != 0
+
     if board.is_win(player):
         return 1
     if board.is_win(-player):
         return -1
     
     # The game has not ended.
-    if board.has_legal_moves():
-        return 0
+    # if board.has_legal_moves():
+    #     return 0
     
     # Tie has a very little value. 
-    return 1e-4
+    # return 1e-4
+
+    return 0
 
   def getCanonicalForm(self, board, player):
+    assert player != 0
     return Board(state=board.canonical_state(), n=self.n)
 
   def getSymmetries(self, board, pi):
