@@ -34,7 +34,8 @@ def get_move_in_arena(canonicalBoard, mcts, game):
     if game.getGameEnded(canonicalBoard, 1) != 0:
         return game.n * game.n
 
-    a = np.argmax(mcts.getActionProb(canonicalBoard, temp=0))
+    pi = mcts.getActionProb(canonicalBoard, temp=0)
+    a = np.argmax(pi)
     valids = game.getValidMoves(canonicalBoard, 1)
     if valids[a] == 0:
         pi = pi * valids  # masking invalid moves
@@ -57,7 +58,7 @@ if human_vs_cpu:
 else:
     # player2 = rp
     n2 = nn(g)
-    n1.load_checkpoint('./best/', 'temp.h5')
+    n1.load_checkpoint('./temp/', 'checkpoint_1.h5')
     args2 = dotdict({'numMCTSSims': 25, 'cpuct':1.0, 'numMCTSDepth': 1000})
     mcts2 = MCTS(g, n2, args2)
     player2 = lambda x: get_move_in_arena(x, mcts2, g)

@@ -75,7 +75,7 @@ class TestGoGame(unittest.TestCase):
     self.assertEqual(g.getGameEnded(b, 1), 1)
 
   def test_getGameEndedOnGoing(self):
-    g = Game(n=2)
+    g = Game(n=3)
     b = g.getInitBoard()
     p = 1
     b, p = g.getNextState(b, p, 0)
