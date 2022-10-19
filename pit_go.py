@@ -26,7 +26,7 @@ hp = None
 n1 = nn(g)
 # n1.load_checkpoint('./temp/', 'best.pth.tar')
 n1.load_checkpoint('./temp/', 'best.h5')
-args1 = dotdict({'numMCTSSims': 25, 'cpuct': 1.0, 'numMCTSDepth': 1000})
+args1 = dotdict({'numMCTSSims': 100, 'cpuct': 1.0, 'numMCTSDepth': 1000})
 mcts1 = MCTS(g, n1, args1)
 
 def get_move_in_arena(canonicalBoard, mcts, game):
@@ -59,7 +59,7 @@ else:
     # player2 = rp
     n2 = nn(g)
     n1.load_checkpoint('./temp/', 'checkpoint_1.h5')
-    args2 = dotdict({'numMCTSSims': 25, 'cpuct':1.0, 'numMCTSDepth': 1000})
+    args2 = dotdict({'numMCTSSims': 100, 'cpuct':1.0, 'numMCTSDepth': 1000})
     mcts2 = MCTS(g, n2, args2)
     player2 = lambda x: get_move_in_arena(x, mcts2, g)
 

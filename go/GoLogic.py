@@ -68,17 +68,17 @@ class Board:
           return True
         elif self.env.turn() == 1 and color == -1 and self.env.winning() == -1:
           return True
-      elif np.sum(self.state()[3]) >= self.n * self.n * 0.5:
-        black_area, white_area = gogame.areas(self.state())
-        area_difference = black_area - white_area
-        komi_correction = area_difference - self.komi
-        ealier_winner = 0
-        if komi_correction >= self.n * self.n / 8.0:
-          ealier_winner = 1
-        elif komi_correction <= -1 * self.n * self.n / 8.0:
-          ealier_winner = -1
+      # elif np.sum(self.state()[3]) >= self.n * self.n * 0.5:
+      #   black_area, white_area = gogame.areas(self.state())
+      #   area_difference = black_area - white_area
+      #   komi_correction = area_difference - self.komi
+      #   ealier_winner = 0
+      #   if komi_correction >= self.n * self.n / 8.0:
+      #     ealier_winner = 1
+      #   elif komi_correction <= -1 * self.n * self.n / 8.0:
+      #     ealier_winner = -1
 
-        return ealier_winner == color
+      #   return ealier_winner == color
       
       return False
 
