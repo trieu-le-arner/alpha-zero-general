@@ -3,6 +3,7 @@ import os
 import sys
 from collections import deque
 from pickle import Pickler, Unpickler
+import hickle as hkl
 from random import shuffle
 
 import numpy as np
@@ -154,9 +155,10 @@ class Coach():
         if not os.path.exists(folder):
             os.makedirs(folder)
         filename = os.path.join(folder, self.getCheckpointFile(iteration) + ".examples")
-        with open(filename, "wb+") as f:
-            Pickler(f).dump(self.trainExamplesHistory)
-        f.closed
+        # with open(filename, "wb+") as f:
+            # Pickler(f).dump(self.trainExamplesHistory)
+        # f.closed
+        hkl.dump(self.trainExamplesHistory, filename, mode='w')
 
     def loadTrainExamples(self):
         modelFile = os.path.join(self.args.load_folder_file[0], self.args.load_folder_file[1])
@@ -168,8 +170,10 @@ class Coach():
                 sys.exit()
         else:
             log.info("File with trainExamples found. Loading it...")
-            with open(examplesFile, "rb") as f:
-                self.trainExamplesHistory = Unpickler(f).load()
+            # with open(examplesFile, "rb") as f:
+            #     self.trainExamplesHistory = Unpickler(f).load()
+
+            self.trainExamplesHistory = hkl.load(examplesFile)
             log.info('Loading done!')
 
             # examples based on the model were already collected (loaded)

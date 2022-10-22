@@ -13,20 +13,20 @@ use this script to play any two agents against each other, or play manually with
 any agent.
 """
 
-human_vs_cpu = False
+human_vs_cpu = True
 
 g = GoGame(n=9)
 
 # all players
 rp = RandomPlayer(g).play
 # hp = HumanGoPlayer(g).play
-hp = None
+hp = GoPlayer(g).play
 
 # nnet players
 n1 = nn(g)
 # n1.load_checkpoint('./temp/', 'best.pth.tar')
 n1.load_checkpoint('./temp/', 'best.h5')
-args1 = dotdict({'numMCTSSims': 100, 'cpuct': 1.0, 'numMCTSDepth': 1000})
+args1 = dotdict({'numMCTSSims': 50, 'cpuct': 1.0, 'numMCTSDepth': 1000})
 mcts1 = MCTS(g, n1, args1)
 
 def get_move_in_arena(canonicalBoard, mcts, game):
@@ -42,13 +42,14 @@ def get_move_in_arena(canonicalBoard, mcts, game):
         sum_pi = np.sum(pi)
         if sum_pi > 0:
             pi = pi / sum_pi  # renormalize
-            return np.random.choice(len(pi), p=pi)
+            a = np.random.choice(len(pi), p=pi)
         else:
             pi = pi + valids
             pi = pi / np.sum(pi)
-            return np.random.choice(len(pi), p=pi)
-    else:
-        return a
+            a = np.random.choice(len(pi), p=pi)
+    
+    print(a // game.n, a % game.n)
+    return a
 
 
 player1 = lambda x: get_move_in_arena(x, mcts1, g)
