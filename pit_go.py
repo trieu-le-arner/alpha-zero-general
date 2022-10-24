@@ -15,7 +15,7 @@ any agent.
 
 human_vs_cpu = True
 
-g = GoGame(n=9)
+g = GoGame(n=5)
 
 # all players
 rp = RandomPlayer(g).play
@@ -26,7 +26,7 @@ hp = GoPlayer(g).play
 n1 = nn(g)
 # n1.load_checkpoint('./temp/', 'best.pth.tar')
 n1.load_checkpoint('./temp/', 'best.h5')
-args1 = dotdict({'numMCTSSims': 50, 'cpuct': 1.0, 'numMCTSDepth': 1000})
+args1 = dotdict({'numMCTSSims': 25, 'cpuct': 1.0, 'numMCTSDepth': 200})
 mcts1 = MCTS(g, n1, args1)
 
 def get_move_in_arena(canonicalBoard, mcts, game):
@@ -36,17 +36,17 @@ def get_move_in_arena(canonicalBoard, mcts, game):
 
     pi = mcts.getActionProb(canonicalBoard, temp=0)
     a = np.argmax(pi)
-    valids = game.getValidMoves(canonicalBoard, 1)
-    if valids[a] == 0:
-        pi = pi * valids  # masking invalid moves
-        sum_pi = np.sum(pi)
-        if sum_pi > 0:
-            pi = pi / sum_pi  # renormalize
-            a = np.random.choice(len(pi), p=pi)
-        else:
-            pi = pi + valids
-            pi = pi / np.sum(pi)
-            a = np.random.choice(len(pi), p=pi)
+    # valids = game.getValidMoves(canonicalBoard, 1)
+    # if valids[a] == 0:
+    #     pi = pi * valids  # masking invalid moves
+    #     sum_pi = np.sum(pi)
+    #     if sum_pi > 0:
+    #         pi = pi / sum_pi  # renormalize
+    #         a = np.random.choice(len(pi), p=pi)
+    #     else:
+    #         pi = pi + valids
+    #         pi = pi / np.sum(pi)
+    #         a = np.random.choice(len(pi), p=pi)
     
     print(a // game.n, a % game.n)
     return a

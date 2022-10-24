@@ -48,22 +48,28 @@ class MCTS():
         counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
 
         if temp == 0:
-            bestAs = np.array(np.argwhere(counts == np.max(counts))).flatten()
-            bestA = np.random.choice(bestAs)
-            probs = [0] * len(counts)
-            probs[bestA] = 1
-            return probs
+            counts_sum = float(sum(counts))
+            if counts_sum > 0:
+                bestAs = np.array(np.argwhere(counts == np.max(counts))).flatten()
+                bestA = np.random.choice(bestAs)
+                probs = [0] * len(counts)
+                probs[bestA] = 1
+                return probs
+            else:
+                probs = self.game.getValidMoves(canonicalBoard, 1)
+                probsSum = sum(probs)
+                probs = [p / probsSum for p in probs]
+                return probs
 
         counts = [x ** (1. / temp) for x in counts]
         counts_sum = float(sum(counts))
         if counts_sum > 0:
             probs = [x / counts_sum for x in counts]
             return probs
-        elif counts_sum == 0:
-            print('Why does the model pick an action while the game has been ended?')
-            print(self.game.getGameEnded(canonicalBoard, 1))
-            probs = [0.0] * self.game.getActionSize()
-            probs[-1] = 1.0
+        else:
+            probs = self.game.getValidMoves(canonicalBoard, 1)
+            probsSum = sum(probs)
+            probs = [p / probsSum for p in probs]
             return probs
 
     def search(self, canonicalBoard, depth=0):
@@ -87,6 +93,7 @@ class MCTS():
         """
 
         if depth > self.args.numMCTSDepth:
+            print('Reached max depth!')
             return 0
 
         s = self.game.stringRepresentation(canonicalBoard)

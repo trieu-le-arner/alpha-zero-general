@@ -66,21 +66,8 @@ class Coach():
             sym = self.game.getSymmetries(canonicalBoard, pi)
             for b, p in sym:
                 trainExamples.append([b.to2darray(), self.curPlayer, p, None])
-
-            valids = self.game.getValidMoves(canonicalBoard, 1)
-    
-
-            pi = pi * valids  # masking invalid moves
-            sum_pi = np.sum(pi)
-            if sum_pi > 0:
-                pi = pi / sum_pi  # renormalize
-            else:
-                pi = pi + valids
-                pi = pi / np.sum(pi)
                 
-
             action = np.random.choice(len(pi), p=pi)
-            
             board, self.curPlayer = self.game.getNextState(board, self.curPlayer, action)
 
             r = self.game.getGameEnded(board, self.curPlayer)
@@ -180,31 +167,29 @@ class Coach():
             self.skipFirstSelfPlay = True
 
 def get_move_in_arena(canonicalBoard, mcts, game):
-    # The game has ended.
-    # if game.getGameEnded(canonicalBoard, 1) != 0:
-    #     return game.n * game.n
-    
     pi = mcts.getActionProb(canonicalBoard, temp=0)
     a = np.argmax(pi)
-    valids = game.getValidMoves(canonicalBoard, 1)
-    if valids[a] == 0:
-        print(canonicalBoard.state())
-        print(game.getGameEnded(canonicalBoard, 1))
+    return a
+    # valids = game.getValidMoves(canonicalBoard, 1)
+    # # Valid before but not valid this turn due to the KO rule
+    # # Or due to the neural network predicts no valid move.
+    # if valids[a] == 0:
+    #     s = game.stringRepresentation(canonicalBoard)
+    #     counts = [mcts.Nsa[(s, action)] if (s, action) in mcts.Nsa else 0 for action in range(game.getActionSize())]
+    #     print("Counts:", counts)
+    #     print("Counts sum:", float(sum(counts)))
+    #     print("Selected action:", a // game.n, a % game.n)
+    #     print("Game state:", canonicalBoard.state())
+    #     print("Game ended:", game.getGameEnded(canonicalBoard, 1))
 
-        pi = pi * valids  # masking invalid moves
-        sum_pi = np.sum(pi)
-        if sum_pi > 0:
-            pi = pi / sum_pi  # renormalize
-            return np.random.choice(len(pi), p=pi)
-        else:
-            pi = pi + valids
-            pi = pi / np.sum(pi)
-            return np.random.choice(len(pi), p=pi)
-        # pi = pi * valids
-        # if np.sum(pi) == 0:
-        #     return game.n * game.n
-        # else:
-        #     pi = pi / np.sum(pi)
-        #     return np.random.choice(len(pi), p=pi)
-    else:
-        return a
+    #     pi = pi * valids  # masking invalid moves
+    #     sum_pi = np.sum(pi)
+    #     if sum_pi > 0:
+    #         pi = pi / sum_pi  # renormalize
+    #         return np.random.choice(len(pi), p=pi)
+    #     else:
+    #         pi = pi + valids
+    #         pi = pi / np.sum(pi)
+    #         return np.random.choice(len(pi), p=pi)
+    # else:
+    #     return a
