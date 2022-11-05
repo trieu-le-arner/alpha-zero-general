@@ -5,6 +5,7 @@ import logging
 import math
 
 import numpy as np
+import gc
 
 EPS = 1e-8
 
@@ -44,6 +45,9 @@ class MCTS():
             self.search(canonicalBoard)
             # print('<<< End the simulation')
         # print('}}} End the turn')
+
+        gc.collect()
+
         s = self.game.stringRepresentation(canonicalBoard)
         counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
 
@@ -93,8 +97,8 @@ class MCTS():
         """
 
         if depth > self.args.numMCTSDepth:
-            print('Reached max depth!')
-            return 0
+            # print('Reached max depth!')
+            return 1
 
         s = self.game.stringRepresentation(canonicalBoard)
 

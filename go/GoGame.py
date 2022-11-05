@@ -47,10 +47,12 @@ class GoGame(Game):
     assert player != 0
     
     valids = [0] * self.getActionSize()
+    valids[-1] = 1
+    
     legalMoves = board.get_legal_moves(player)
-    if len(legalMoves) == 0:
-      valids[-1] = 1 # Force the player to pass (other actions are disabled with 0)
-      return np.array(valids)
+    # if len(legalMoves) == 0:
+    #   valids[-1] = 1 # Force the player to pass (other actions are disabled with 0)
+    #   return np.array(valids)
     for x, y in legalMoves:
       valids[self.n * x + y] = 1
     return np.array(valids)

@@ -73,9 +73,9 @@ class Board:
       #   area_difference = black_area - white_area
       #   komi_correction = area_difference - self.komi
       #   ealier_winner = 0
-      #   if komi_correction >= self.n * self.n / 8.0:
+      #   if komi_correction >= self.n * self.n / 5.0:
       #     ealier_winner = 1
-      #   elif komi_correction <= -1 * self.n * self.n / 8.0:
+      #   elif komi_correction <= -1 * self.n * self.n / 5.0:
       #     ealier_winner = -1
 
       #   return ealier_winner == color

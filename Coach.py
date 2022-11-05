@@ -1,4 +1,5 @@
 import logging
+import gc
 import os
 import sys
 from collections import deque
@@ -74,6 +75,10 @@ class Coach():
 
             if r != 0:
                 return [(x[0], x[2], r * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
+            elif episodeStep >= self.args.maxTurns:
+                return [(x[0], x[2], board.env.winning() * self.curPlayer * ((-1) ** (x[1] != self.curPlayer))) for x in trainExamples]
+
+        gc.collect()
 
     def learn(self):
         """
@@ -84,11 +89,11 @@ class Coach():
         only if it wins >= updateThreshold fraction of games.
         """
 
-        for i in range(1, self.args.numIters + 1):
+        for i in range(self.args.startIterIndex, self.args.numIters + 1):
             # bookkeeping
             log.info(f'Starting Iter #{i} ...')
             # examples of the iteration
-            if not self.skipFirstSelfPlay or i > 1:
+            if not self.skipFirstSelfPlay or i > self.args.startIterIndex:
                 iterationTrainExamples = deque([], maxlen=self.args.maxlenOfQueue)
 
                 for _ in tqdm(range(self.args.numEps), desc="Self Play"):
@@ -98,7 +103,7 @@ class Coach():
                 # save the iteration examples to the history 
                 self.trainExamplesHistory.append(iterationTrainExamples)
 
-            if len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
+            while len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
                 log.warning(
                     f"Removing the oldest entry in trainExamples. len(trainExamplesHistory) = {len(self.trainExamplesHistory)}")
                 self.trainExamplesHistory.pop(0)
@@ -126,7 +131,7 @@ class Coach():
             pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
 
             log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
-            if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
+            if pwins + nwins == 0 or float(nwins) / (pwins + nwins) <= self.args.updateThreshold:
                 log.info('REJECTING NEW MODEL')
                 self.nnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             else:
@@ -164,32 +169,31 @@ class Coach():
             log.info('Loading done!')
 
             # examples based on the model were already collected (loaded)
-            self.skipFirstSelfPlay = True
+            self.skipFirstSelfPlay = False
 
 def get_move_in_arena(canonicalBoard, mcts, game):
     pi = mcts.getActionProb(canonicalBoard, temp=0)
     a = np.argmax(pi)
-    return a
-    # valids = game.getValidMoves(canonicalBoard, 1)
-    # # Valid before but not valid this turn due to the KO rule
-    # # Or due to the neural network predicts no valid move.
-    # if valids[a] == 0:
-    #     s = game.stringRepresentation(canonicalBoard)
-    #     counts = [mcts.Nsa[(s, action)] if (s, action) in mcts.Nsa else 0 for action in range(game.getActionSize())]
-    #     print("Counts:", counts)
-    #     print("Counts sum:", float(sum(counts)))
-    #     print("Selected action:", a // game.n, a % game.n)
-    #     print("Game state:", canonicalBoard.state())
-    #     print("Game ended:", game.getGameEnded(canonicalBoard, 1))
+    valids = game.getValidMoves(canonicalBoard, 1)
+    # Valid before but not valid this turn due to the KO rule
+    # Or due to the neural network predicts no valid move.
+    if valids[a] == 0:
+        s = game.stringRepresentation(canonicalBoard)
+        counts = [mcts.Nsa[(s, action)] if (s, action) in mcts.Nsa else 0 for action in range(game.getActionSize())]
+        print("Counts:", counts)
+        print("Counts sum:", float(sum(counts)))
+        print("Selected action:", a // game.n, a % game.n)
+        print("Game state:", canonicalBoard.state())
+        print("Game ended:", game.getGameEnded(canonicalBoard, 1))
 
-    #     pi = pi * valids  # masking invalid moves
-    #     sum_pi = np.sum(pi)
-    #     if sum_pi > 0:
-    #         pi = pi / sum_pi  # renormalize
-    #         return np.random.choice(len(pi), p=pi)
-    #     else:
-    #         pi = pi + valids
-    #         pi = pi / np.sum(pi)
-    #         return np.random.choice(len(pi), p=pi)
-    # else:
-    #     return a
+        pi = pi * valids  # masking invalid moves
+        sum_pi = np.sum(pi)
+        if sum_pi > 0:
+            pi = pi / sum_pi  # renormalize
+            return np.random.choice(len(pi), p=pi)
+        else:
+            pi = pi + valids
+            pi = pi / np.sum(pi)
+            return np.random.choice(len(pi), p=pi)
+    else:
+        return a

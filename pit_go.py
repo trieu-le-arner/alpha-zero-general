@@ -26,7 +26,24 @@ hp = GoPlayer(g).play
 n1 = nn(g)
 # n1.load_checkpoint('./temp/', 'best.pth.tar')
 n1.load_checkpoint('./temp/', 'best.h5')
-args1 = dotdict({'numMCTSSims': 25, 'cpuct': 1.0, 'numMCTSDepth': 200})
+args = dotdict({
+    'numIters': 5,
+    'numEps': 100,              # Number of complete self-play games to simulate during a new iteration.
+    'tempThreshold': 15,        
+    'updateThreshold': 0.6,     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
+    'maxlenOfQueue': 150000,    # Number of game examples to train the neural networks.
+    'numMCTSSims': 25,          # Number of games moves for MCTS to simulate.
+    'arenaCompare': 40,         # Number of games to play during arena play to determine if new net will be accepted.
+    'cpuct': 1.0,
+    'checkpoint': './temp/',
+    'load_model': True,
+    'load_folder_file': ('./temp', 'best.pth.tar'),
+    'numItersForTrainExamplesHistory': 15,
+    'numMCTSDepth': 50,
+    'maxTurns': 35,
+    'startIterIndex': 3,
+})
+args1 = args
 mcts1 = MCTS(g, n1, args1)
 
 def get_move_in_arena(canonicalBoard, mcts, game):
@@ -59,8 +76,8 @@ if human_vs_cpu:
 else:
     # player2 = rp
     n2 = nn(g)
-    n1.load_checkpoint('./temp/', 'checkpoint_1.h5')
-    args2 = dotdict({'numMCTSSims': 100, 'cpuct':1.0, 'numMCTSDepth': 1000})
+    n2.load_checkpoint('./temp/', 'best.h5')
+    args2 = args
     mcts2 = MCTS(g, n2, args2)
     player2 = lambda x: get_move_in_arena(x, mcts2, g)
 
