@@ -15,7 +15,7 @@ any agent.
 
 human_vs_cpu = True
 
-g = GoGame(n=7)
+g = GoGame(n=5)
 
 # all players
 rp = RandomPlayer(g).play
@@ -25,7 +25,7 @@ hp = GoPlayer(g).play
 # nnet players
 n1 = nn(g)
 # n1.load_checkpoint('./temp/', 'best.pth.tar')
-n1.load_checkpoint('./temp/', 'best.h5')
+n1.load_checkpoint('./temp (5x5)/', 'best.h5')
 args = dotdict({       
     'numMCTSSims': 50,          # Number of games moves for MCTS to simulate.
     'cpuct': 1.0,
@@ -65,7 +65,7 @@ if human_vs_cpu:
 else:
     # player2 = rp
     n2 = nn(g)
-    n2.load_checkpoint('./temp/', 'best.h5')
+    n2.load_checkpoint('./temp (5x5)/', 'best.h5')
     args2 = args
     mcts2 = MCTS(g, n2, args2)
     player2 = lambda x: get_move_in_arena(x, mcts2, g)
