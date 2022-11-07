@@ -169,7 +169,7 @@ class Coach():
             log.info('Loading done!')
 
             # examples based on the model were already collected (loaded)
-            self.skipFirstSelfPlay = False
+            self.skipFirstSelfPlay = True
 
 def get_move_in_arena(canonicalBoard, mcts, game):
     pi = mcts.getActionProb(canonicalBoard, temp=0)
